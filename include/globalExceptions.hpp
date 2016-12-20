@@ -6,7 +6,7 @@ struct PortError : public exception {
       return "Invalid Port or No Port specified";
    }
 };
-
+//Winsock sepcific
 struct WinsockStartUpError : public exception {
     const char * what () const throw () {
         return "Winsock failed to initialize";
@@ -16,6 +16,12 @@ struct WinsockStartUpError : public exception {
 struct sockSendError : public exception {
     const char * what () const throw () {
         return "send failed possible socket error";
+    }
+};
+
+struct sockWriteError : public exception {
+    const char * what () const throw () {
+	return "write failed possible socket error";
     }
 };
 

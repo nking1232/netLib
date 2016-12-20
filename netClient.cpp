@@ -1,5 +1,6 @@
 #include "include/netClient.h"
 
+#ifdef _WIN32
 netClient::netClient(char * server, char * port)
 {
      WSAData Comdata;
@@ -65,7 +66,14 @@ netClient::netClient(char * server, char * port)
     char value = 1;
     setsockopt(clientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 }
+#endif //_WIN32
 
+#ifdef linux
+netClient::netClient(char *server, char *port)
+{
+  
+}
+#endif //linux
 netClient::~netClient()
 {
     //dtor

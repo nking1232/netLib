@@ -1,5 +1,5 @@
 #include "include/netServer.h"
-
+#ifdef _WIN32
 netServer::netServer(char * port)
 {
     if(port == NULL)
@@ -46,6 +46,29 @@ netServer::netServer(char * port)
     iResult = listen(ListenSocket, SOMAXCONN);
 
 }
+#endif//_WIN32
+
+#ifdef linux
+netServer::netServer(char * port)
+{
+  if(port == NULL)
+    throw PortError();
+  struct sockaddr_in serv_addr;
+  ListenSocket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
+  
+  
+  serv_addr.sin_family = AF_INET;
+  serv_addr.sin_addr.s_addr = INADDR_ANY;
+  serv_addr.sin_port = htons(atoi(port));
+  
+  if (bind(ListenSocket, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
+  {
+    //Error binidng
+  }
+  listen(ListenSocket,5);
+  
+}
+#endif //linux
 
 netServer::~netServer()
 {
@@ -54,6 +77,7 @@ netServer::~netServer()
 
 
 // accept new connections
+#ifdef _WIN32
 bool netServer::acceptNewClient(int id)
 {
     // if client waiting, accept the connection and save the socket
@@ -79,8 +103,30 @@ bool netServer::acceptNewClient(int id)
 
     return false;
 }
-
+#endif //_WIN32
+#ifdef linux
+bool netServer::acceptNewClient(int id)
+{
+  struct sockaddr_in cli_addr;
+  socklen_t clilen = sizeof(cli_addr);
+  ClientSocket = accept(ListenSocket, (struct sockaddr *) &cli_addr, &clilen);
+  if(ClientSocket > 0)
+  {
+    //We possibly have a connection here.
+    fcntl(ClientSocket, F_SETFL, O_NONBLOCK);
+    
+    sessions.insert( pair<int, int>(id, ClientSocket));
+    if(onConnect != NULL)
+    {
+      onConnect(id, this);
+    }
+    return true;
+  }
+  return false;
+}
+#endif //linux
 // receive incoming data
+#ifdef _WIN32
 int netServer::receiveData(int client_id, char * recvbuf)
 {
     if( sessions.find(client_id) != sessions.end() )
@@ -93,8 +139,21 @@ int netServer::receiveData(int client_id, char * recvbuf)
 
     return 0;
 }
+#endif //_WIN32
+#ifdef linux
+int netServer::receiveData(int client_id, char * recvbuf)
+{
+  if(sessions.find(client_id) != sessions.end() )
+  {
+    int currentSocket = sessions[client_id];
+    int iResult = recv(currentSocket, recvbuf, 100000, 0);//Same as for windows
+    
+    return iResult;
+  }
+}
+#endif //linux
 
-// send data to all clients
+#ifdef _WIN32
 void netServer::sendToAll(char * packets, int totalSize)
 {
     SOCKET currentSocket;
@@ -112,7 +171,26 @@ void netServer::sendToAll(char * packets, int totalSize)
         }
     }
 }
+#endif //_WIN32
+#ifdef linux
+void netServer::sendToAll(char * packets, int totalSize)
+{
+  int currentSocket;
+  std::map<int, int>::iterator iter;
+  int iSendResult;
+  
+  for(iter = sessions.begin(); iter != sessions.end(); iter++)
+  {
+    currentSocket = iter->second;
+    iSendResult = write(currentSocket, packets, totalSize);
+    if(iSendResult < 0)
+    {
+    }
+  }
+}
+#endif //linux
 
+#ifdef _WIN32
 void netServer::sendToClient(int client_id, char * packets, int totalSize)
 {
     SOCKET currentSocket;
@@ -127,6 +205,12 @@ void netServer::sendToClient(int client_id, char * packets, int totalSize)
 
     }
 }
+#endif //_WIN32
+#ifdef _linux
+void netServer::sendToClient(int cleint_id, char * packets, int totalSize)
+{
+}
+#endif //linux
 
 unsigned int netServer::getFirstUnusedId()
 {
@@ -145,6 +229,7 @@ unsigned int netServer::getFirstUnusedId()
     return temp;
 }
 
+#ifdef _WIN32
 void netServer::receiveFromClients()
 {
     Packet packet;
@@ -188,7 +273,14 @@ void netServer::receiveFromClients()
         }
     }
 }
+#endif //_WIN32
+#ifdef _linux
+void netServer::receiveFromClients()
+{
+}
+#endif //linux
 
+#ifdef _WIN32
 char *netServer::receiveFromClientRaw()
 {
     map<int, SOCKET>::iterator iter;
@@ -211,7 +303,14 @@ char *netServer::receiveFromClientRaw()
         onReceiveRaw(network_data, iter->first, this);
     }
 }
+#endif //_WIN32
+#ifdef linux
+char *netServer::receiveFromClientRaw()
+{
+}
+#endif //linux
 
+#ifdef _WIN32
 void netServer::disconnectClient(int cl_id)
 {
     if(sessions.find(cl_id) != sessions.end())
@@ -228,7 +327,25 @@ void netServer::disconnectClient(int cl_id)
         }
     }
 }
-
+#endif //_WIN32
+#ifdef linux
+void netServer::disconnectClient(int cl_id)
+{
+  if(sessions.find(cl_id) != sessions.end())
+    {
+        int currentSocket = sessions[cl_id];
+        if(currentSocket < 0)
+        {
+            close(currentSocket);
+            sessions.erase(cl_id);
+            if(onDisconnect != NULL)
+            {
+                onDisconnect(cl_id, this);
+            }
+        }
+    }
+}
+#endif //linux
 void netServer::update()
 {
     //Accept incoming connections
