@@ -31,16 +31,18 @@ class netClient
         netClient(char*, char*);
         virtual ~netClient();
         int receiveData(char *);
-        void sendData(char *, int dataLen);
+        int sendData(char *, int dataLen);
+		
+		void update();
 
         void (*onReceive)(Packet, netClient*);
     protected:
     private:
       #ifdef _WIN32
-        SOCKET clientSocket = INVALID_SOCKET;
+        SOCKET ConnectSocket = INVALID_SOCKET;
       #endif //_WIN32
       #ifdef linux
-		int clientSocket=0;//Linux sockets are just integers
+		int ConnectSocket=0;//Linux sockets are just integers
       #endif //linux
 };
 

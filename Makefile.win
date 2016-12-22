@@ -6,10 +6,10 @@ main : netServer.o netClient.o
 	$(AR) rcs netLib.a netServer.o netClient.o
 
 netServer.o : netServer.cpp
-	$(CXX) $(CFLAGS) -c netServer.cpp -o netServer.o
+	$(CXX) $(CFLAGS) -c netServer.cpp -o netServer.o -lws2_32
 
 netClient.o : netClient.cpp
-	$(CXX) $(CFLAGS) -c netClient.cpp -o netClient.o
+	$(CXX) $(CFLAGS) -c netClient.cpp -o netClient.o -lws2_32
 	
 clean:
 	del netLib.a
