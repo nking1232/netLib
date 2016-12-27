@@ -193,6 +193,7 @@ void netServer::sendToAll(char * packets, int totalSize)
 #ifdef _WIN32
 void netServer::sendToClient(int client_id, char * packets, int totalSize)
 {
+    #warning "Compiling for wind32"
     SOCKET currentSocket;
     if( sessions.find(client_id) != sessions.end() )
     {
@@ -212,22 +213,6 @@ void netServer::sendToClient(int cleint_id, char * packets, int totalSize)
 }
 #endif //linux
 
-unsigned int netServer::getFirstUnusedId()
-{
-    unsigned int temp = 0;
-    while(true)
-    {
-        if( sessions.find(temp) != sessions.end())
-        {
-            temp++;
-        }
-        else
-        {
-            break;
-        }
-    }
-    return temp;
-}
 
 #ifdef _WIN32
 void netServer::receiveFromClients()

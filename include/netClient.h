@@ -30,10 +30,10 @@ class netClient
     public:
         netClient(char*, char*);
         virtual ~netClient();
-        int receiveData(char *);
+        int receiveData();
         int sendData(char *, int dataLen);
-		
-		void update();
+	void disconnect();
+	void update();
 
         void (*onReceive)(Packet, netClient*);
     protected:

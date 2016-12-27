@@ -67,6 +67,8 @@ netClient::netClient(char * server, char * port)
     setsockopt(ConnectSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 }
 #endif //_WIN32
+#ifdef linux
+#endif //linux
 
 #ifdef _WIN32
 
@@ -85,7 +87,7 @@ netClient::~netClient()
     //dtor
 }
 #ifdef _WIN32
-int netClient::receiveData(char * recvbuf) 
+int netClient::receiveData() 
 {
     int iResult = recv(ConnectSocket, recvbuf, 100000, 0);
 
@@ -104,10 +106,29 @@ int netClient::receiveData(char * recvbuf)
 #endif //linux
 
 #ifdef _WIN32
-int netClient::sendData(char *, int dataLen)
+int netClient::sendData(char *data, int dataLen)
 {
-	
+	int iResult = send(ConnectSocket, data, dataLen, 0);
 }
 #endif //_WIN32
 #ifdef linux
 #endif //linux
+
+#ifdef _WIN32
+void netClient::disconnect()
+{
+		closesocket(ConnectSocket);
+}
+#endif //_WIN32
+#ifdef linux
+void netClient::disconnect()
+{
+	close(ConnectSocket);
+}
+#endif //linux
+
+
+void netClient::update()
+{
+	receiveData();
+}
