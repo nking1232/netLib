@@ -35,7 +35,9 @@ class netClient
 	void disconnect();
 	void update();
 
-        void (*onReceive)(Packet, netClient*);
+        void (*onReceive)(char *, netClient*);
+		void (*onSendFail(this);
+		void (*onReceiveFail)(this);
     protected:
     private:
       #ifdef _WIN32

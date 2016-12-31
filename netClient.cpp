@@ -89,17 +89,21 @@ netClient::~netClient()
 #ifdef _WIN32
 int netClient::receiveData() 
 {
+	
 	char * recvbuf = 0;
+	ZeroMemory( recvbuf, sizeof(recvbuf));
     int iResult = recv(ConnectSocket, recvbuf, 100000, 0);
 
     if ( iResult == 0 )
     {
-        cout << "Connection closed\n";
-        closesocket(ConnectSocket);
-        WSACleanup();
-        exit(1);
+        //Connection was probably lost.
     }
-
+	if(onReceive == NULL)
+	{
+		
+	}
+	onReceive(recvbuf, this);
+	
     return iResult;
 }
 #endif //_WIN32
