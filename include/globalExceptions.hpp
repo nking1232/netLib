@@ -6,11 +6,24 @@ struct PortError : public exception {
       return "Invalid Port or No Port specified";
    }
 };
+
 //Winsock sepcific
 struct WinsockStartUpError : public exception {
     const char * what () const throw () {
         return "Winsock failed to initialize";
     }
+};
+
+struct bindError : public exception {
+	const char * what () const throw () {
+		return "Failed to bind";
+	}
+};
+
+struct nonBlockingModeError : public exception {
+	const char * what () const throw () {
+		return "Unable to set a socket to non-blocking mode";
+	}
 };
 
 struct sockSendError : public exception {

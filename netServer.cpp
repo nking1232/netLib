@@ -4,9 +4,6 @@ netServer::netServer(char * port)
 {
     if(port == NULL)
         throw PortError();//Something is not right with the port throw an exception.
-    #ifdef _netDebug
-        cout <<"Attempting to open server on port: " << port << endl;
-    #endif // _netDebug
     WSAData Comdata;
 
     struct addrinfo * result = NULL;
@@ -15,9 +12,6 @@ netServer::netServer(char * port)
     int iResult = WSAStartup(MAKEWORD(2,2), &Comdata);
     if(iResult != 0)
     {
-        #ifdef _netDebug
-         cout << "Failed to start winsock at line: 13 in file: netServer.cpp" << endl;
-        #endif
         throw WinsockStartUpError();//We have a problem let's throw an exception.
     }
 
@@ -39,8 +33,17 @@ netServer::netServer(char * port)
 
     u_long iMode = 1;
     iResult = ioctlsocket(ListenSocket, FIONBIO, &iMode);
+	if(iResult != 0)
+	{
+		throw nonBlockingModeError();
+		
+	}
 
     iResult = bind( ListenSocket, result->ai_addr, (int)result->ai_addrlen);
+	if(iResult != 0)
+	{
+		throw bindError();
+	}
 
     freeaddrinfo(result);
     iResult = listen(ListenSocket, SOMAXCONN);
@@ -64,6 +67,7 @@ netServer::netServer(char * port)
   if (bind(ListenSocket, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
   {
     //Error binidng
+	throw bindError();
   }
   listen(ListenSocket,5);
   
@@ -193,7 +197,6 @@ void netServer::sendToAll(char * packets, int totalSize)
 #ifdef _WIN32
 void netServer::sendToClient(int client_id, char * packets, int totalSize)
 {
-    #warning "Compiling for wind32"
     SOCKET currentSocket;
     if( sessions.find(client_id) != sessions.end() )
     {
@@ -213,60 +216,8 @@ void netServer::sendToClient(int cleint_id, char * packets, int totalSize)
 }
 #endif //linux
 
-
 #ifdef _WIN32
 void netServer::receiveFromClients()
-{
-    Packet packet;
-    map<int, SOCKET>::iterator iter;
-    char network_data[1000000];
-    int cl_id = 0;
-    memset(network_data,0, sizeof(network_data));
-
-    for(iter = sessions.begin(); iter != sessions.end(); iter++)
-    {
-        cl_id = iter->first;
-
-        cout << "Attempting to Receive from Client ID: " << cl_id << endl;
-        int data_length = receiveData(cl_id, network_data);
-
-        if(data_length <= 0)
-        {
-            //No data was received.
-            continue;
-        }
-
-        if(data_length < sizeof(packet))
-        {
-            continue;
-        }
-
-
-        int i = 0;
-        while (i < data_length)//Don't know about this one
-        {
-            packet.deserialize(&(network_data[i]));
-            i += sizeof(Packet);
-            if(onReceive == NULL)
-            {
-                throw noPointerToFunction(); //We need to make sure a function was supplied to handle incoming data.
-                return; //Just in case
-            }
-
-            cout << "Received Data from Client with ID: " << cl_id << endl;
-            onReceive(packet, cl_id, this);
-        }
-    }
-}
-#endif //_WIN32
-#ifdef _linux
-void netServer::receiveFromClients()
-{
-}
-#endif //linux
-
-#ifdef _WIN32
-char *netServer::receiveFromClientRaw()
 {
     map<int, SOCKET>::iterator iter;
     char network_data[1000000];
@@ -281,16 +232,16 @@ char *netServer::receiveFromClientRaw()
         {
             continue;
         }
-        if(onReceiveRaw == NULL)
+        if(onReceive== NULL)
         {
             throw noPointerToFunction();
         }
-        onReceiveRaw(network_data, iter->first, this);
+        onReceive(network_data, iter->first, this);
     }
 }
 #endif //_WIN32
 #ifdef linux
-char *netServer::receiveFromClientRaw()
+char *netServer::receiveFromClients()
 {
 }
 #endif //linux
@@ -331,21 +282,12 @@ void netServer::disconnectClient(int cl_id)
     }
 }
 #endif //linux
+
 void netServer::update()
 {
-    //Accept incoming connections
     if(acceptNewClient(cid))
     {
         cid++;
     }
     receiveFromClients();
-}
-
-void netServer::updateRaw()
-{
-    if(acceptNewClient(cid))
-    {
-        cid++;
-    }
-    receiveFromClientRaw();
 }

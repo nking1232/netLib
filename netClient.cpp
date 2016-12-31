@@ -89,6 +89,7 @@ netClient::~netClient()
 #ifdef _WIN32
 int netClient::receiveData() 
 {
+	char * recvbuf = 0;
     int iResult = recv(ConnectSocket, recvbuf, 100000, 0);
 
     if ( iResult == 0 )

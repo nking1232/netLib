@@ -36,13 +36,10 @@ class netServer
         void sendToAll(char * packets, int totalSize);
         unsigned int getFirstUnusedId();
         void receiveFromClients();
-        char *receiveFromClientRaw();
         void disconnectClient(int cl_id);
         void update();
-        void updateRaw();
 
-        void (*onReceive) (Packet, int, netServer*) = NULL; //A pointer to a function called when we receive a packet.
-        void (*onReceiveRaw) (char*, int, netServer*) = NULL;//Same as above but for use with raw connections.
+        void (*onReceive) (char*, int, netServer*) = NULL; //A pointer to a function called when we receive a data;
         void (*onConnect) (int, netServer*);
         void (*onDisconnect)(int, netServer*);
     protected:
