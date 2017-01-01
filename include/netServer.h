@@ -25,9 +25,7 @@ Copyright (C) 2017  Nathan King
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
-#endif //_WIN32
-
-#ifdef linux
+#elif __linux__
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,7 +34,27 @@ Copyright (C) 2017  Nathan King
 #include <sys/socket.h>
 #include <sys/fcntl.h>
 #include <netinet/in.h>
-#endif //linux
+#elif __APPLE__
+		#error "Not Supported"
+		#include "TargetConditionals.h"
+		#if TARGET_IPHONE_SIMULATOR
+			#warning "Compiling under IPhone Simulator"
+			//iOS Simulator
+		#elif TARGET_OS_IPHONE
+			#warning "Compiling under IPhone"
+			//iOS device
+		#elif TARGET_OS_MAC
+			#warning "Compiling under mac"
+			//Mac OS
+		#else
+			#error "Unknown Apple platform"
+		#endif
+#elif __unix__
+		#error "Not Supported"
+		#warning "Compiling under __unix__"
+#else
+		#error "Unknown Compiler"
+#endif
 
 #include "packet.hpp"
 #include "globalExceptions.hpp"

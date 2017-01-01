@@ -21,7 +21,6 @@ Copyright (C) 2017  Nathan King
 netServer::netServer(char * port)
 {
 	#ifdef _WIN32
-		#warning "Compiling netServer::netServer() under windows"
 		if(port == NULL)
 			throw PortError();//Something is not right with the port throw an exception.
 		WSAData Comdata;
@@ -314,6 +313,7 @@ void netServer::sendToClient(int client_id, char * packets, int totalSize)
 			int iSendResult = send(currentSocket, packets, totalSize, 0);
 			if(iSendResult == SOCKET_ERROR)
 			{
+				//This occurs when the connection is interupted;
 				throw sockSendError();
 			}
 

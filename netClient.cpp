@@ -16,9 +16,10 @@ Copyright (C) 2017  Nathan King
 */
 #include "include/netClient.h"
 
-#ifdef _WIN32
+
 netClient::netClient(char * server, char * port)
 {
+	#ifdef _WIN32
      WSAData Comdata;
 
     struct addrinfo *result = NULL,
@@ -81,23 +82,64 @@ netClient::netClient(char * server, char * port)
 
     char value = 1;
     setsockopt(ConnectSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
-}
-#endif //_WIN32
-#ifdef linux
-netClient::netClient(char * server, char * port)
-{
+#elif linux
 	if(port == NULL)
 	{
 		throw portError();
 	}
 	
-	ConnectSocket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP)
+	ConnectSocket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
+	#elif __APPLE__
+		#error "Not Supported"
+		#include "TargetConditionals.h"
+		#if TARGET_IPHONE_SIMULATOR
+			#warning "Compiling under IPhone Simulator"
+			//iOS Simulator
+		#elif TARGET_OS_IPHONE
+			#warning "Compiling under IPhone"
+			//iOS device
+		#elif TARGET_OS_MAC
+			#warning "Compiling under mac"
+			//Mac OS
+		#else
+			#error "Unknown Apple platform"
+		#endif
+	#elif __unix__
+		#error "Not Supported"
+		#warning "Compiling under __unix__"
+	#else
+		#error "Unknown Compiler"
+	#endif
 }
-#endif //linux
+
 
 netClient::~netClient()
 {
-    //dtor
+    //TODO: Add some deconstruction routines.
+	#ifdef _WIN32
+	#elif __linux__
+	#warning "Compiling under __linux__"
+	#elif __APPLE__
+		#error "Not Supported"
+		#include "TargetConditionals.h"
+		#if TARGET_IPHONE_SIMULATOR
+			#warning "Compiling under IPhone Simulator"
+			//iOS Simulator
+		#elif TARGET_OS_IPHONE
+			#warning "Compiling under IPhone"
+			//iOS device
+		#elif TARGET_OS_MAC
+			#warning "Compiling under mac"
+			//Mac OS
+		#else
+			#error "Unknown Apple platform"
+		#endif
+	#elif __unix__
+		#error "Not Supported"
+		#warning "Compiling under __unix__"
+	#else
+		#error "Unknown Compiler"
+	#endif
 }
 #ifdef _WIN32
 int netClient::receiveData() 
