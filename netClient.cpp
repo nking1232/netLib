@@ -68,20 +68,17 @@ netClient::netClient(char * server, char * port)
 }
 #endif //_WIN32
 #ifdef linux
-#endif //linux
-
-#ifdef _WIN32
-
-#endif //_WIN32
-#ifdef linux
-
-#endif //linux
-#ifdef linux
-netClient::netClient(char *server, char *port)
+netClient::netClient(char * server, char * port)
 {
-  
+	if(port == NULL)
+	{
+		throw portError();
+	}
+	
+	ConnectSocket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP)
 }
 #endif //linux
+
 netClient::~netClient()
 {
     //dtor
@@ -100,7 +97,7 @@ int netClient::receiveData()
     }
 	if(onReceive == NULL)
 	{
-		
+		throw noPointerToFunction();
 	}
 	onReceive(recvbuf, this);
 	
@@ -114,6 +111,10 @@ int netClient::receiveData()
 int netClient::sendData(char *data, int dataLen)
 {
 	int iResult = send(ConnectSocket, data, dataLen, 0);
+	if(iResult == SOCKET_ERROR)
+	{
+		
+	}
 }
 #endif //_WIN32
 #ifdef linux
@@ -122,7 +123,8 @@ int netClient::sendData(char *data, int dataLen)
 #ifdef _WIN32
 void netClient::disconnect()
 {
-		closesocket(ConnectSocket);
+	//Of course microsoft has to deviate from almost every standard.
+	closesocket(ConnectSocket);
 }
 #endif //_WIN32
 #ifdef linux

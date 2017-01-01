@@ -40,8 +40,8 @@ class netServer
         void update();
 
         void (*onReceive) (char*, int, netServer*) = NULL; //A pointer to a function called when we receive a data;
-        void (*onConnect) (int, netServer*);
-        void (*onDisconnect)(int, netServer*);
+        void (*onConnect) (int, netServer*) = NULL;
+        void (*onDisconnect)(int, netServer*) = NULL;
     protected:
     private:
 	#ifdef _WIN32
