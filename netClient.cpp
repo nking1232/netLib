@@ -82,7 +82,7 @@ netClient::netClient(char * server, char * port)
 
     char value = 1;
     setsockopt(ConnectSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
-#elif linux
+	#elif __linux__
 	if(port == NULL)
 	{
 		throw portError();
@@ -141,56 +141,110 @@ netClient::~netClient()
 		#error "Unknown Compiler"
 	#endif
 }
-#ifdef _WIN32
 int netClient::receiveData() 
 {
-	
-	char * recvbuf = 0;
-	ZeroMemory( recvbuf, sizeof(recvbuf));
-    int iResult = recv(ConnectSocket, recvbuf, 100000, 0);
+	#ifdef _WIN32
+		char * recvbuf = 0;
+		ZeroMemory( recvbuf, sizeof(recvbuf));
+		int iResult = recv(ConnectSocket, recvbuf, 100000, 0);
 
-    if ( iResult == 0 )
-    {
-        //Connection was probably lost.
-    }
-	if(onReceive == NULL)
-	{
-		throw noPointerToFunction();
-	}
-	onReceive(recvbuf, this);
+		if ( iResult == 0 )
+		{
+			//Connection was probably lost.
+		}
+		if(onReceive == NULL)
+		{
+			throw noPointerToFunction();
+		}
+		onReceive(recvbuf, this);
 	
-    return iResult;
+		return iResult;
+	#elif __linux__
+	#elif __APPLE__
+		#error "Not Supported"
+		#include "TargetConditionals.h"
+		#if TARGET_IPHONE_SIMULATOR
+			#warning "Compiling under IPhone Simulator"
+			//iOS Simulator
+		#elif TARGET_OS_IPHONE
+			#warning "Compiling under IPhone"
+			//iOS device
+		#elif TARGET_OS_MAC
+			#warning "Compiling under mac"
+			//Mac OS
+		#else
+			#error "Unknown Apple platform"
+		#endif
+	#elif __unix__
+		#error "Not Supported"
+		#warning "Compiling under __unix__"
+	#else
+		#error "Unknown Compiler"
+	#endif
 }
-#endif //_WIN32
-#ifdef linux
-#endif //linux
 
-#ifdef _WIN32
 int netClient::sendData(char *data, int dataLen)
 {
-	int iResult = send(ConnectSocket, data, dataLen, 0);
-	if(iResult == SOCKET_ERROR)
-	{
+	#ifdef _WIN32
+		int iResult = send(ConnectSocket, data, dataLen, 0);
+		if(iResult == SOCKET_ERROR)
+		{
 		
-	}
+		}
+	#elif __linux__
+	#elif __APPLE__
+		#error "Not Supported"
+		#include "TargetConditionals.h"
+		#if TARGET_IPHONE_SIMULATOR
+			#warning "Compiling under IPhone Simulator"
+			//iOS Simulator
+		#elif TARGET_OS_IPHONE
+			#warning "Compiling under IPhone"
+			//iOS device
+		#elif TARGET_OS_MAC
+			#warning "Compiling under mac"
+			//Mac OS
+		#else
+			#error "Unknown Apple platform"
+		#endif
+	#elif __unix__
+		#error "Not Supported"
+		#warning "Compiling under __unix__"
+	#else
+		#error "Unknown Compiler"
+	#endif
 }
-#endif //_WIN32
-#ifdef linux
-#endif //linux
 
-#ifdef _WIN32
+
 void netClient::disconnect()
 {
-	//Of course microsoft has to deviate from almost every standard.
-	closesocket(ConnectSocket);
-}
-#endif //_WIN32
-#ifdef linux
-void netClient::disconnect()
-{
+	#ifdef _WIN32
+		//Of course microsoft has to deviate from almost every standard.
+		closesocket(ConnectSocket);
+	#elif __linux__
 	close(ConnectSocket);
+	#elif __APPLE__
+		#error "Not Supported"
+		#include "TargetConditionals.h"
+		#if TARGET_IPHONE_SIMULATOR
+			#warning "Compiling under IPhone Simulator"
+			//iOS Simulator
+		#elif TARGET_OS_IPHONE
+			#warning "Compiling under IPhone"
+			//iOS device
+		#elif TARGET_OS_MAC
+			#warning "Compiling under mac"
+			//Mac OS
+		#else
+			#error "Unknown Apple platform"
+		#endif
+	#elif __unix__
+		#error "Not Supported"
+		#warning "Compiling under __unix__"
+	#else
+		#error "Unknown Compiler"
+	#endif
 }
-#endif //linux
 
 
 void netClient::update()

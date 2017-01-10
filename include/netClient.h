@@ -24,9 +24,7 @@ Copyright (C) 2017  Nathan King
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
-#endif //_WIN32
-
-#ifdef linux
+#elif __linux__
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,7 +33,7 @@ Copyright (C) 2017  Nathan King
 #include <sys/socket.h>
 #include <sys/fcntl.h>
 #include <netinet/in.h>
-#endif //linux
+#endif
 
 #include "packet.hpp"
 #include "globalExceptions.hpp"
@@ -59,10 +57,9 @@ class netClient
     private:
       #ifdef _WIN32
         SOCKET ConnectSocket = INVALID_SOCKET;
-      #endif //_WIN32
-      #ifdef linux
+      #elif __linux__
 		int ConnectSocket=0;//Linux sockets are just integers
-      #endif //linux
+      #endif
 };
 
 #endif // NETCLIENT_H

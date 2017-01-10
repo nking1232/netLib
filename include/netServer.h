@@ -80,16 +80,11 @@ class netServer
     private:
 	#ifdef _WIN32
         SOCKET ClientSocket = INVALID_SOCKET, ListenSocket = INVALID_SOCKET;
-	#endif //_WIN32
-	#ifdef linux
-	int ClientSocket = 0, ListenSocket = 0;
-	#endif //linux
-	#ifdef _WIN32
-        std::map<int, SOCKET> sessions;
-	#endif //_WIN32
-	#ifdef linux
-	std::map<int, int> sessions;//Linux sockets are just integers
-	#endif //linux
+		std::map<int, SOCKET> sessions;
+	#elif __linux__
+		int ClientSocket = 0, ListenSocket = 0;
+		std::map<int, int> sessions;//Linux sockets are just integers
+	#endif
         int cid = 1;
 
 };
