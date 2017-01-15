@@ -83,6 +83,9 @@ netClient::netClient(char * server, char * port)
     char value = 1;
     setsockopt(ConnectSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 	#elif __linux__
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
 	if(port == NULL)
 	{
 		throw portError();
@@ -118,7 +121,9 @@ netClient::~netClient()
     //TODO: Add some deconstruction routines.
 	#ifdef _WIN32
 	#elif __linux__
-	#warning "Compiling under __linux__"
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
 	#elif __APPLE__
 		#error "Not Supported"
 		#include "TargetConditionals.h"
@@ -145,12 +150,18 @@ int netClient::receiveData()
 {
 	#ifdef _WIN32
 		char * recvbuf = 0;
+		//If we do not zero out our receive buffer stange things will happen
 		ZeroMemory( recvbuf, sizeof(recvbuf));
 		int iResult = recv(ConnectSocket, recvbuf, 100000, 0);
 
 		if ( iResult == 0 )
 		{
 			//Connection was probably lost.
+			if(onReceiveFail == NULL)
+			{
+				throw noPointerToFunction();
+			}
+			onReceiveFail(this);
 		}
 		if(onReceive == NULL)
 		{
@@ -160,6 +171,9 @@ int netClient::receiveData()
 	
 		return iResult;
 	#elif __linux__
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
 	#elif __APPLE__
 		#error "Not Supported"
 		#include "TargetConditionals.h"
@@ -189,9 +203,16 @@ int netClient::sendData(char *data, int dataLen)
 		int iResult = send(ConnectSocket, data, dataLen, 0);
 		if(iResult == SOCKET_ERROR)
 		{
-		
+			if(onSendFail == NULL)
+			{
+				throw noPointerToFunction();
+			}
+			onSendFail(this);
 		}
 	#elif __linux__
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
 	#elif __APPLE__
 		#error "Not Supported"
 		#include "TargetConditionals.h"
@@ -222,7 +243,10 @@ void netClient::disconnect()
 		//Of course microsoft has to deviate from almost every standard.
 		closesocket(ConnectSocket);
 	#elif __linux__
-	close(ConnectSocket);
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
+		close(ConnectSocket);
 	#elif __APPLE__
 		#error "Not Supported"
 		#include "TargetConditionals.h"

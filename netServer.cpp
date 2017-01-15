@@ -68,7 +68,9 @@ netServer::netServer(char * port)
 		iResult = listen(ListenSocket, SOMAXCONN);
 
 	#elif __linux__
-		#warning "Compiling under linux"
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
 		if(port == NULL)
 			throw PortError();
 		struct sockaddr_in serv_addr;
@@ -113,6 +115,9 @@ netServer::~netServer()
 	//TODO: Add some deconstruction routines.
     #ifdef _WIN32
 	#elif __linux__
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
 	#elif __APPLE__
 		#error "Not Supported"
 		#include "TargetConditionals.h"
@@ -166,6 +171,9 @@ bool netServer::acceptNewClient(int id)
 		return false;
 
 	#elif __linux__
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
 		struct sockaddr_in cli_addr;
 		socklen_t clilen = sizeof(cli_addr);
 		ClientSocket = accept(ListenSocket, (struct sockaddr *) &cli_addr, &clilen);
@@ -218,6 +226,9 @@ int netServer::receiveData(int client_id, char * recvbuf)
 
 		return 0;
 	#elif __linux__
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
 		if(sessions.find(client_id) != sessions.end() )
 		{
 			int currentSocket = sessions[client_id];
@@ -267,6 +278,9 @@ void netServer::sendToAll(char * packets, int totalSize)
 			}
 		}
 	#elif __linux__
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
 		int currentSocket;
 		std::map<int, int>::iterator iter;
 		int iSendResult;
@@ -319,6 +333,9 @@ void netServer::sendToClient(int client_id, char * packets, int totalSize)
 
 		}
 	#elif __linux__
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
 	#elif __APPLE__
 		#error "Not Supported"
 		#include "TargetConditionals.h"
@@ -367,6 +384,9 @@ void netServer::receiveFromClients()
 			onReceive(network_data, iter->first, this);
 		}
 	#elif __linux__
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
 	#elif __APPLE__
 		#error "Not Supported"
 		#include "TargetConditionals.h"
@@ -409,6 +429,9 @@ void netServer::disconnectClient(int cl_id)
 			}
 		}
 	#elif __linux__
+		#ifndef __Debug
+			#error "Unsupported"
+		#endif
 		if(sessions.find(cl_id) != sessions.end())
 		{
 			int currentSocket = sessions[cl_id];
