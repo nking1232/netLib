@@ -14,7 +14,7 @@ Copyright (C) 2017  Nathan King
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "include/netClient.h"
+#include "include/netClient.hpp"
 
 
 netClient::netClient(char * server, char * port)
@@ -86,12 +86,24 @@ netClient::netClient(char * server, char * port)
 		#ifndef __Debug
 			#error "Unsupported"
 		#endif
-	if(port == NULL)
-	{
-		throw portError();
-	}
+		struct addrinfo hints, *res;
+		if(port == NULL)
+		{
+			throw portError();
+		}
+		
+		memset(&hints, 0, sizeof hints);
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM | SOCK_NONBLOCK;
+		hints.ai_protocol = IPPROTO_TCP;
+		
+		getaddrinfo(server, port, &hints, &res);
 	
-	ConnectSocket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
+		ConnectSocket = socket(res->ai_family, res->ai_socktype, hints.ai_protocol);
+		
+		connect(ConnectSocket, res->ai_addr, res->ai_addrlen);
+	
+	
 	#elif __APPLE__
 		#error "Not Supported"
 		#include "TargetConditionals.h"
