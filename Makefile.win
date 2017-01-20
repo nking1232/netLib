@@ -18,7 +18,7 @@ netClient.o : netClient.cpp
 	$(CXX) $(CFLAGS) -c netClient.cpp -o netClient.o
 	
 netClient.o_debug : netClient.cpp
-	$(CXX) -D__Debug $(CFLAGS) -c netClient.cpp -o netClient.o
+	$(CXX) -D__Debug $(CFLAGS) -c netClient.cpp -o netClient.o -lws2_32
 
 clean:
 	del netLib.a
