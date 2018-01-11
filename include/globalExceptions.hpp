@@ -16,7 +16,10 @@ Copyright (C) 2017  Nathan King
 */
 #ifndef GLOBALEXCEPTIONS_HPP_INCLUDED
 #define GLOBALEXCEPTIONS_HPP_INCLUDED
+
 #include <exception>
+using namespace std;
+
 struct PortError : public exception {
    const char * what () const throw () {
       return "Invalid Port or No Port specified";
@@ -70,6 +73,13 @@ struct noPointerToFunction : public exception{
     const char * what () const throw () {
         return "Pointer to function not supplied";
     }
+};
+
+struct connectionFailed : public exception{
+	const char * what () const throw ()
+	{
+		return "Connection failed";
+	}
 };
 
 
