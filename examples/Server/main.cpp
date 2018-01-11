@@ -6,7 +6,8 @@ using namespace std;
 void dataReceived(char* data, int cid, netServer *theServer)
 {
     cout << "DATA: " << data << " FROM " << cid << endl;
-    char* packets = "HTTP-Version = HTTP/1.1 200 OK/n/r Date: Mon, 27 Jul 2009 12:28:53 GMT/n/rServer: Overhaul/1.0.0 (Win32/64)/n/rLast-Modified: Wed, 22 Jul 2009 19:15:56 (GMT)/n/rContent-Length: 88/n/rContent-Type: text/html/n/rConnection: Closed/n/r<html><body><h1>Hello, World!</h1></body></html>";
+    char packets[] = "Boop";
+    cout << packets << endl;
     cout << sizeof(packets) << endl;
     theServer->sendToClient(cid, packets, strlen(packets));
     theServer->disconnectClient(cid);

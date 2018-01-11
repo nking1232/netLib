@@ -58,7 +58,7 @@ class netClient
 
 
                 int iResult = 1;
-
+                WSAData Comdata;
                 iResult = WSAStartup(MAKEWORD(2,2), &Comdata);
                 if(iResult != 0)
                     throw WinsockStartUpError();
@@ -115,8 +115,6 @@ class netClient
                 setsockopt(ConnectSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
             #elif __linux__
                 struct addrinfo hints, *res;
-                if(port == NULL)
-                    throw portError();
 
                     memset(&hints, 0, sizeof hints);
                 hints.ai_family = AF_UNSPEC;
@@ -150,25 +148,21 @@ class netClient
         int receiveData()
         {
             #ifdef _WIN32
-                char * recvbuf = 0;
-                //If we do not zero out our receive buffer strange things will happen
-                ZeroMemory( recvbuf, sizeof(recvbuf));
+                char * recvbuf = NULL;
                 int iResult = recv(ConnectSocket, recvbuf, 100000, 0);
 
                 if ( iResult == 0 )
                 {
                     //Connection was probably lost.
                     if(onReceiveFail == NULL)
-                    {
                         throw noPointerToFunction();
-                    }
-                    onReceiveFail(this);
+                    else
+                        onReceiveFail(this);
                 }
                 if(onReceive == NULL)
-                {
                     throw noPointerToFunction();
-                }
-                onReceive(recvbuf, this);
+                else
+                    onReceive(recvbuf, this);
 
                 return iResult;
             #elif __linux__
@@ -187,10 +181,9 @@ class netClient
                 if(iResult == SOCKET_ERROR)
                 {
                     if(onSendFail == NULL)
-                    {
                         throw noPointerToFunction();
-                    }
-                    onSendFail(this);
+                    else
+                        onSendFail(this);
                 }
             #elif __linux__
                 #ifndef __Debug
